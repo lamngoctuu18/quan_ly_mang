@@ -20,6 +20,8 @@ except ModuleNotFoundError as exc:
     )
     raise SystemExit(1) from exc
 
+from PySide6.QtCore import QTimer
+
 from lan_manager.core.config import get_config
 from lan_manager.core.logging_config import get_logger, setup_logging
 from lan_manager.infrastructure.database.connection import get_db_manager
@@ -38,8 +40,12 @@ def main() -> int:
     app = QApplication(sys.argv)
     app.setApplicationName(config.app_name)
 
+    # Directly show the main window with zero splash overhead
     window = MainWindow(config=config, db_manager=db_manager)
     window.show()
+
+    # Defer background database loading until AFTER the window is visible
+    QTimer.singleShot(50, window.deferred_startup)
 
     exit_code = app.exec()
     db_manager.dispose()

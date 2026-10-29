@@ -42,7 +42,7 @@ class AppConfig(BaseModel):
     db_name: str = Field(default="lan_printer_manager")
     db_user: str = Field(default="lan_manager_app")
     db_password: str = Field(default="")
-    db_connect_timeout: int = Field(default=5, ge=1, le=60)
+    db_connect_timeout: int = Field(default=3, ge=1, le=60)
     db_pool_size: int = Field(default=5, ge=1, le=50)
     db_max_overflow: int = Field(default=10, ge=0, le=100)
     database_url_override: str | None = Field(default=None)

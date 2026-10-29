@@ -91,7 +91,12 @@ class MainWindow(QMainWindow):
         self._build_ui()
         self._wire_signals()
 
-        # Perform initial non-blocking load
+        # NOTE: All DB-dependent startup work is deferred to deferred_startup()
+        # called via QTimer.singleShot(0) AFTER the window is shown on screen.
+        # This ensures the UI appears instantly without waiting for PostgreSQL.
+
+    def deferred_startup(self) -> None:
+        """Run after the window is visible — performs non-blocking DB checks and data loading."""
         self.settings_page.test_db_connection()
         self.dashboard_page.refresh_dashboard()
         self.diagnostics_page.load_device_choices()

@@ -26,6 +26,8 @@ class ServiceWorker(QRunnable):
     Supports optional cancel_event and progress callback injection.
     """
 
+    _active_workers: set[ServiceWorker] = set()
+
     def __init__(
         self,
         task_name: str,
@@ -45,6 +47,7 @@ class ServiceWorker(QRunnable):
         self._supports_progress = supports_progress
         self.cancel_event = threading.Event()
         self.signals = WorkerSignals()
+        ServiceWorker._active_workers.add(self)
 
     def request_cancel(self) -> None:
         """Signal cooperative cancellation to the running task."""
@@ -59,7 +62,10 @@ class ServiceWorker(QRunnable):
 
     @Slot()
     def run(self) -> None:
-        self.signals.started_task.emit(self.task_name)
+        try:
+            self.signals.started_task.emit(self.task_name)
+        except RuntimeError:
+            pass
         try:
             call_kwargs = dict(self._kwargs)
             if self._supports_cancel:
@@ -68,10 +74,20 @@ class ServiceWorker(QRunnable):
                 call_kwargs["progress_callback"] = self._on_progress
 
             output = self._fn(*self._args, **call_kwargs)
-            self.signals.result.emit(output)
+            try:
+                self.signals.result.emit(output)
+            except RuntimeError:
+                pass
         except Exception as exc:
             err_code = getattr(exc, "error_code", exc.__class__.__name__)
             tb_summary = traceback.format_exc(limit=3)
-            self.signals.error.emit(str(exc), f"{err_code}\n{tb_summary}")
+            try:
+                self.signals.error.emit(str(exc), f"{err_code}\n{tb_summary}")
+            except RuntimeError:
+                pass
         finally:
-            self.signals.finished_task.emit()
+            try:
+                self.signals.finished_task.emit()
+            except RuntimeError:
+                pass
+            ServiceWorker._active_workers.discard(self)

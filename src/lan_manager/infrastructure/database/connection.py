@@ -38,7 +38,7 @@ class DatabaseManager:
         if self._engine is None:
             url = self.database_url
             engine_kwargs: dict[str, Any] = {
-                "pool_pre_ping": True,
+                "pool_pre_ping": False,
                 "future": True,
             }
             if url.startswith("postgresql"):
