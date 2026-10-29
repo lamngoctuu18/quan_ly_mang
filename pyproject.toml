@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lan-printer-manager"
+version = "1.0.0"
+description = "Enterprise LAN Printer & Network Device Management Desktop Application"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Proprietary - Internal Enterprise Use" }
+authors = [
+    { name = "IT Infrastructure & Network Engineering Team" }
+]
+dependencies = [
+    "PySide6>=6.7.0,<7.0.0",
+    "SQLAlchemy>=2.0.35,<2.1.0",
+    "psycopg[binary]>=3.2.0,<4.0.0",
+    "alembic>=1.13.3,<2.0.0",
+    "pydantic>=2.9.0,<3.0.0",
+    "python-dotenv>=1.0.1,<2.0.0",
+    "pysnmp>=7.1.0,<8.0.0",
+    "pywin32>=306; sys_platform == 'win32'",
+    "bcrypt>=4.1.0,<6.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.0,<9.0.0",
+    "pytest-qt>=4.4.0,<5.0.0",
+    "ruff>=0.7.0,<1.0.0",
+    "pyinstaller>=6.10.0; sys_platform == 'win32'",
+]
+
+[project.scripts]
+lan-printer-manager = "lan_manager.main:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-v --tb=short"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "N", "S"]
+ignore = ["S101", "S603", "S607", "E501", "N802"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S105", "S106"]
+"src/lan_manager/main.py" = ["E402"]
